@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import ssl
 import argparse
 import json
 import logging
@@ -192,9 +192,12 @@ def consecutive_nights(available, nights):
     return long_enough_consecutive_ranges
 
 def SendMail(email_text, port, provider):
+  context = ssl.create_default_context()
   server = smtplib.SMTP_SSL(provider, port)
-  server.login('crackcat2k11', 'ankitmittalbgh')
-  server.sendmail('crackcat2k11@gmail.com', 'crackcat2k11@gmail.com', email_text)
+  server.ehlo()
+  #server.starttls(context=context)
+  server.login("crackcat2k11", "")
+  server.sendmail("crackcat2k11@gmail.com", "crackcat2k11@gmail.com", email_text)
 
 def check_park(park_id, start_date, end_date, campsite_type, nights=None):
     park_information = get_park_information(
@@ -320,7 +323,6 @@ if __name__ == "__main__":
         ),
     )
 
-    SendMail('test mail', 465, 'smtp.googlemail.com')
     parks_group = parser.add_mutually_exclusive_group(required=True)
     parks_group.add_argument(
         "--parks", dest="parks", metavar="park", nargs="+", help="Park ID(s)", type=int
