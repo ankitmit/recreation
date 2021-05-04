@@ -7,7 +7,7 @@ import sys
 from datetime import datetime, timedelta
 from dateutil import rrule
 from itertools import count, groupby
-
+import smtplib
 import requests
 from fake_useragent import UserAgent
 
@@ -25,9 +25,6 @@ MAIN_PAGE_ENDPOINT = "/api/camps/campgrounds/"
 INPUT_DATE_FORMAT = "%Y-%m-%d"
 ISO_DATE_FORMAT_REQUEST = "%Y-%m-%dT00:00:00.000Z"
 ISO_DATE_FORMAT_RESPONSE = "%Y-%m-%dT00:00:00Z"
-
-SUCCESS_EMOJI = "🏕"
-FAILURE_EMOJI = "❌"
 
 headers = {"User-Agent": UserAgent().random}
 
@@ -194,6 +191,10 @@ def consecutive_nights(available, nights):
 
     return long_enough_consecutive_ranges
 
+def SendMail(email_text, port, provider):
+  server = smtplib.SMTP_SSL(provider, port)
+  server.login('crackcat2k11', 'ankitmittalbgh')
+  server.sendmail('crackcat2k11@gmail.com', 'crackcat2k11@gmail.com', email_text)
 
 def check_park(park_id, start_date, end_date, campsite_type, nights=None):
     park_information = get_park_information(
@@ -214,12 +215,16 @@ def check_park(park_id, start_date, end_date, campsite_type, nights=None):
 def output_human_output(parks):
     out = []
     availabilities = False
+    available_mail_text = ''
     for park_id in parks:
         current, maximum, _, name_of_park = check_park(
             park_id, args.start_date, args.end_date, args.campsite_type, nights=args.nights
         )
         if current:
             availabilities = True
+            available_mail_text += "{} ({}): {} site(s) available out of {} site(s)".format(
+                name_of_park, park_id, current, maximum
+            ) + "\n"
 
         out.append(
             "{} ({}): {} site(s) available out of {} site(s)".format(
@@ -234,6 +239,7 @@ def output_human_output(parks):
                 args.end_date.strftime(INPUT_DATE_FORMAT),
             )
         )
+        SendMail(available_mail_text,  465, 'smtp.googlemail.com')
     else:
         print("There are no campsites available :(")
     print("\n".join(out))
@@ -313,6 +319,8 @@ if __name__ == "__main__":
             "avaiable dates and which sites are available."
         ),
     )
+
+    SendMail('test mail', 465, 'smtp.googlemail.com')
     parks_group = parser.add_mutually_exclusive_group(required=True)
     parks_group.add_argument(
         "--parks", dest="parks", metavar="park", nargs="+", help="Park ID(s)", type=int
