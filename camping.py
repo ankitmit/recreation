@@ -219,14 +219,11 @@ def output_human_output(parks):
             park_id, args.start_date, args.end_date, args.campsite_type, nights=args.nights
         )
         if current:
-            emoji = SUCCESS_EMOJI
             availabilities = True
-        else:
-            emoji = FAILURE_EMOJI
 
         out.append(
-            "{} {} ({}): {} site(s) available out of {} site(s)".format(
-                emoji, name_of_park, park_id, current, maximum
+            "{} ({}): {} site(s) available out of {} site(s)".format(
+                name_of_park, park_id, current, maximum
             )
         )
 
