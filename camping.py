@@ -265,11 +265,13 @@ def output_json_output(parks):
     return availabilities
 
 
-def main(parks, json_output=False):
-    if json_output:
-        return output_json_output(parks)
-    else:
-        return output_human_output(parks)
+def main(parks):
+    while True:
+        availabilities = output_human_output(parks)
+        if availabilities:
+            time.sleep(300)
+        else:
+            time.sleep(60)
 
 
 def valid_date(s):
@@ -342,8 +344,8 @@ if __name__ == "__main__":
     parks = args.parks or [p.strip() for p in sys.stdin]
 
     try:
-        code = 0 if main(parks, json_output=args.json_output) else 1
-        sys.exit(code)
+        main(parks, json_output=args.json_output)
+        sys.exit()
     except Exception:
         print("Something went wrong")
         LOG.exception("Something went wrong")
